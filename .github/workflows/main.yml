@@ -46,7 +46,7 @@ jobs:
           echo "bin tree:"
           find bin -maxdepth 5 -type f 2>/dev/null | sort || true
 
-      - name: Upload artifact
+          - name: Upload artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -54,3 +54,12 @@ jobs:
           path: |
             bin/**
           if-no-files-found: warn
+
+- name: Inspect build output
+        run: |
+          echo "Current dir:"
+          pwd
+          echo "Top-level files:"
+          find . -maxdepth 3 -type f | sort | head -200
+          echo "bin contents:"
+          find bin -maxdepth 5 -type f 2>/dev/null | sort || echo "no bin directory"
