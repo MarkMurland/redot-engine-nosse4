@@ -1,8 +1,7 @@
 # Set x86 CPU instruction sets to use by the compiler's autovectorization.
 if env["arch"] == "x86_64":
-    # On 64-bit x86, keep the base x86_64 baseline instead of forcing SSE4.2.
-    # This preserves compatibility with older x86_64 CPUs while still using
-    # the standard SSE2 baseline for 64-bit x86.
+    # x86_64 CPUs are required to support SSE2, which is the baseline for 64-bit x86.
+    # Avoid forcing newer ISA levels that would reject older 64-bit systems.
     if env.msvc and not methods.using_clang(env):
         env.Append(CCFLAGS=["/arch:SSE2"])
     else:

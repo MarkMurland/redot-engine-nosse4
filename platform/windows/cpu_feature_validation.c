@@ -1,7 +1,3 @@
-/**************************************************************************/
-/*  cpu_feature_validation.c                                              */
-/**************************************************************************/
-/*                         This file is part of:                          */
 /*                             REDOT ENGINE                               */
 /*                        https://redotengine.org                         */
 /**************************************************************************/
@@ -29,6 +25,8 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
+
+#include <windows.h>
 
 #ifdef WINDOWS_SUBSYSTEM_CONSOLE
 extern int WINAPI mainCRTStartup();
