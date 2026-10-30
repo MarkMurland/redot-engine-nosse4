@@ -1,23 +1,13 @@
-import os
-
-# SCons may initialize the project environment later than this file is read.
-# Keep the branch resilient by falling back to a minimal environment and CLI args.
-if 'env' not in globals():
-    env = Environment(ENV={'PATH': os.environ.get('PATH', '')})
-
-arch = env.get('arch', ARGUMENTS.get('arch', 'x86_64'))
-
-# Keep x86_64 on the SSE2 baseline for this branch and avoid forcing SSE4.2,
-# SSSE3, or POPCNT flags that reject older 64-bit CPUs.
-if arch == 'x86_64':
-    compiler = str(env.get('CC', '')).lower()
-    if 'cl' in compiler or 'clang-cl' in compiler or env.get('MSVC_VERSION'):
-        env.Append(CCFLAGS=['/arch:SSE2'])
+# Set x86 CPU instruction sets to use by the compiler's autovectorization.
+if env["arch"] == "x86_64":
+    # x86_64 requires at least SSE2; avoid forcing newer ISA levels.
+    if getattr(env, "msvc", False) and not methods.using_clang(env):
+        env.Append(CCFLAGS=["/arch:SSE2"])
     else:
-        env.Append(CCFLAGS=['-msse2'])
-elif arch == 'x86_32':
-    compiler = str(env.get('CC', '')).lower()
-    if 'cl' in compiler or 'clang-cl' in compiler or env.get('MSVC_VERSION'):
-        env.Append(CCFLAGS=['/arch:SSE2'])
+        env.Append(CCFLAGS=["-msse2"])
+elif env["arch"] == "x86_32":
+    # Keep 32-bit x86 conservative.
+    if getattr(env, "msvc", False) and not methods.using_clang(env):
+        env.Append(CCFLAGS=["/arch:SSE2"])
     else:
-        env.Append(CCFLAGS=['-msse2', '-mfpmath=sse', '-mstackrealign'])
+        env.Append(CCFLAGS=["-msse2", "-mfpmath=sse", "-mstackrealign"])
