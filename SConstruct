@@ -281,10 +281,10 @@ opts.Add(BoolVariable("builtin_icu4c", "Use the built-in ICU library", True))
 opts.Add(BoolVariable("builtin_libjpeg_turbo", "Use the built-in libjpeg-turbo library", True))
 opts.Add(BoolVariable("builtin_libogg", "Use the built-in libogg library", True))
 opts.Add(BoolVariable("builtin_libpng", "Use the built-in libpng library", True))
-opts.Add(BoolVariable("builtin_libtheora", "Use the built-in libtheora library", True))
-opts.Add(BoolVariable("builtin_libvorbis", "Use the built-in libvorbis library", True))
-opts.Add(BoolVariable("builtin_libwebp", "Use the built-in libwebp library", True))
-opts.Add(BoolVariable("builtin_wslay", "Use the built-in wslay library", True))
+opts.Add(BoolVariable("builtin_libtheora", "Use the built-in LibTheora library", True))
+opts.Add(BoolVariable("builtin_libvorbis", "Use the built-in LibVorbis library", True))
+opts.Add(BoolVariable("builtin_libwebp", "Use the built-in LibWebP library", True))
+opts.Add(BoolVariable("builtin_wslay", "Use the built-in WSLay library", True))
 opts.Add(BoolVariable("builtin_mbedtls", "Use the built-in mbedTLS library", True))
 opts.Add(BoolVariable("builtin_miniupnpc", "Use the built-in miniupnpc library", True))
 opts.Add(BoolVariable("builtin_openxr", "Use the built-in OpenXR library", True))
@@ -688,7 +688,7 @@ elif methods.using_clang(env):
         if cc_version_major < 16:
             print_error(
                 "Detected Clang version older than 16, which does not fully support "
-                "C++20. Supported versions are Clang 16 and later."
+                "C++20. Supported versions are Clang 16 or later."
             )
             Exit(255)
 
@@ -712,7 +712,8 @@ if env["arch"] == "x86_64":
         env.Append(CCFLAGS=["/d2archSSE42"])
     else:
         # `-msse2` is implied when compiling for x86_64.
-       
+        # core/math/simd.h relies on SSE4.1 intrinsics being available on x86_64 (clang-cl included).
+        env.Append(CCFLAGS=["-msse4.2", "-mpopcnt"])
 elif env["arch"] == "x86_32":
     # Be more conservative with instruction sets on 32-bit x86 to improve compatibility.
     # SSE and SSE2 are present on all CPUs that support 64-bit, even if running a 32-bit OS.
@@ -855,7 +856,7 @@ if env.msvc and not methods.using_clang(env):  # MSVC
         "/wd4324",  # C4820 (structure was padded due to alignment specifier)
         "/wd4514",  # C4514 (unreferenced inline function has been removed)
         "/wd4714",  # C4714 (function marked as __forceinline not inlined)
-        "/wd4820",  # C4820 (padding added after construct)
+        "/wd4820",  # C4820 (padding added due to alignment specifier)
         "/wd4611",  # C4611 (interaction between '_setjmp' and C++ object destruction is non-portable): libpng uses setjmp use for error handling
     ]
 
