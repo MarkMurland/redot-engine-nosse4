@@ -704,25 +704,22 @@ elif env.msvc:
 
 # Set x86 CPU instruction sets to use by the compiler's autovectorization.
 if env["arch"] == "x86_64":
-    # On 64-bit x86, enable SSE 4.2 and prior instruction sets (SSE3/SSSE3/SSE4/SSE4.1) to improve performance.
-    # This is supported on most CPUs released after 2009-2011 (Intel Nehalem, AMD Bulldozer).
-    # AVX and AVX2 aren't enabled because they aren't available on more recent low-end Intel CPUs.
-    if env.msvc and not methods.using_clang(env):
-        # https://stackoverflow.com/questions/64053597/how-do-i-enable-sse4-1-and-sse3-but-not-avx-in-msvc/69328426
-        env.Append(CCFLAGS=["/d2archSSE42"])
-    else:
-        # `-msse2` is implied when compiling for x86_64.
-        # core/math/simd.h relies on SSE4.1 intrinsics being available on x86_64 (clang-cl included).
-        env.Append(CCFLAGS=["-msse4.2", "-mpopcnt"])
-elif env["arch"] == "x86_32":
-    # Be more conservative with instruction sets on 32-bit x86 to improve compatibility.
-    # SSE and SSE2 are present on all CPUs that support 64-bit, even if running a 32-bit OS.
+    # x86_64 requires at least SSE2.
+    # This branch intentionally does NOT enable SSE4.2 / POPCNT / SSSE3.
     if env.msvc and not methods.using_clang(env):
         env.Append(CCFLAGS=["/arch:SSE2"])
     else:
-        # Use `-mfpmath=sse` to use SSE for floating-point math, which is more stable than x87.
-        # `-mstackrealign` is needed for it to work.
+        env.Append(CCFLAGS=["-msse2"])
+elif env["arch"] == "x86_32":
+    # Keep 32-bit x86 conservative.
+    if env.msvc and not methods.using_clang(env):
+        env.Append(CCFLAGS=["/arch:SSE2"])
+    else:
         env.Append(CCFLAGS=["-msse2", "-mfpmath=sse", "-mstackrealign"])
+
+if env["platform"] == "linuxbsd" and env["arch"] != "x86_64":
+    print_error("This no-SSE4.2 branch builds Linux x86_64 only. Use arch=x86_64.")
+    Exit(255)
 
 # Explicitly specify colored output.
 if methods.using_gcc(env):
