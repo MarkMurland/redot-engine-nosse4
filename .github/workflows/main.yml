@@ -1,38 +1,44 @@
-name: Linux editor (no SSE4.2)
+name: Redot editor (no SSE4.2)
 on:
   push:
-    branches: [26.3-No-SSE4.2, nosse42]
+    branches: [nosse42]
   workflow_dispatch:
 
 jobs:
-  build-linux:
+  build:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-      - name: Ensure no SSE4 compiler flags are still forced
+      - name: Ensure no SSE4 flags are forced
         run: |
           set -e
           if grep -RIn -- "-msse4" SConstruct platform/linuxbsd; then
-            echo "SSE4 compiler flag still present"; exit 1
+            echo "SSE4 flag still present"; exit 1
           fi
           if grep -RIn -- "-mssse3" SConstruct platform/linuxbsd; then
-            echo "SSSE3 compiler flag still present"; exit 1
+            echo "SSSE3 flag still present"; exit 1
           fi
 
-      - name: Install Linux build dependencies
+      - name: Install Linux dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential pkg-config \
-            libx11-dev libxcursor-dev libxinerama-dev libgl1-mesa-dev \
-            libglu1-mesa-dev libasound2-dev libpulse-dev libudev-dev \
-            libxi-dev libxrandr-dev
+          sudo apt-get install -y build-essential pkg-config gcc g++ \
+            libx11-dev libxcursor-dev libxinerama-dev libxext-dev libxrender-dev \
+            libxkbcommon-dev libgl1-mesa-dev libglu1-mesa-dev \
+            libasound2-dev libpulse-dev libudev-dev libxi-dev libxrandr-dev \
+            libdbus-1-dev libwayland-bin
           python3 -m pip install --upgrade pip scons
 
-      - name: Build Linux editor
-        run: scons platform=linuxbsd target=editor arch=x86_64 wayland=no debug_symbols=no -j"$(nproc)"
+      - name: Build editor (no SSE4.2)
+        run: |
+          scons platform=linuxbsd target=editor arch=x86_64 x11=yes wayland=no vulkan=no debug_symbols=no -j"$(nproc)"
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
           name: redot-editor-nosse42-linux
           path: bin/redot.linuxbsd.editor.x86_64
