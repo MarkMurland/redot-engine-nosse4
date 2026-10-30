@@ -1,34 +1,35 @@
-name: Redot editor (no SSE4.2)
+name: Linux editor (no SSE4.2)
 on:
   push:
-    branches: [nosse42]
+    branches: [26.3-No-SSE4.2, nosse42]
   workflow_dispatch:
 
 jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
-      - name: Make sure SSE4 isn't still forced
+      - name: Ensure SSE4 flags are not forced
         run: |
-          if grep -rn "msse4" SConstruct platform/linuxbsd; then
+          if grep -RInE "msse4|sse4" SConstruct platform/linuxbsd; then
             echo "SSE4 flag still present"; exit 1
           fi
 
-      - name: Install dependencies
+      - name: Install Linux build dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential pkg-config \
             libx11-dev libxcursor-dev libxinerama-dev libgl1-mesa-dev \
             libglu1-mesa-dev libasound2-dev libpulse-dev libudev-dev \
             libxi-dev libxrandr-dev
-          pip install scons
+          python3 -m pip install --upgrade pip scons
 
-      - name: Build editor
-        run: scons platform=linuxbsd target=editor arch=x86_64 wayland=no debug_symbols=no -j$(nproc)
+      - name: Build Linux editor
+        run: scons platform=linuxbsd target=editor arch=x86_64 wayland=no debug_symbols=no -j"$(nproc)"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: redot-editor-nosse42
+          name: redot-editor-nosse42-linux
           path: bin/redot.linuxbsd.editor.x86_64
+          if-no-files-found: error
