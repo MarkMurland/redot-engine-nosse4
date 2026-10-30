@@ -38,13 +38,16 @@ jobs:
           scons platform=linuxbsd target=editor arch=x86_64 x11=yes wayland=no vulkan=no debug_symbols=no -j"$(nproc)"
 
       - name: Inspect build output
+        shell: bash
         run: |
+          set +e
           echo "PWD:"
           pwd
           echo "Top-level files:"
-          find . -maxdepth 3 -type f | sort | head -200 || true
+          find . -maxdepth 3 -type f | sort | head -200
           echo "bin contents:"
-          find bin -maxdepth 5 -type f 2>/dev/null | sort || true
+          find bin -maxdepth 5 -type f 2>/dev/null | sort
+          echo "inspection complete"
 
       - name: Upload artifact
         if: always()
