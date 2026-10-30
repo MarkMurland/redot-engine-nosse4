@@ -10,10 +10,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Ensure SSE4 flags are not forced
+      - name: Ensure no SSE4 compiler flags are still forced
         run: |
-          if grep -RInE "msse4|sse4" SConstruct platform/linuxbsd; then
-            echo "SSE4 flag still present"; exit 1
+          set -e
+          if grep -RIn -- "-msse4" SConstruct platform/linuxbsd; then
+            echo "SSE4 compiler flag still present"; exit 1
+          fi
+          if grep -RIn -- "-mssse3" SConstruct platform/linuxbsd; then
+            echo "SSSE3 compiler flag still present"; exit 1
           fi
 
       - name: Install Linux build dependencies
