@@ -1,7 +1,7 @@
-    # Set x86 CPU instruction sets to use when building Embree's own intrinsics.
-    # Keep this in sync with Godot's main SConstruct file.
-    # This is only needed on MSVC, as GCC/Clang will set those defines automatically
-    # according to compiler instruction set flags.
-    if env["arch"] != "x86_64" or env.msvc:
-        # Embree needs those; it will automatically use SSE2NEON in ARM.
-        env_thirdparty.Append(CPPDEFINES=["__SSE__", "__SSE2__"])
+# Set x86 CPU instruction sets to use when building Embree's own intrinsics.
+# Keep this in sync with Godot's main SConstruct file.
+# This is only needed on MSVC, as GCC/Clang will set those defines automatically
+# according to compiler instruction set flags.
+if env["arch"] != "x86_64" or env.msvc:
+    # Embree needs those; it will automatically use SSE2NEON in ARM.
+    env_thirdparty.Append(CPPDEFINES=["__SSE__", "__SSE2__"])
