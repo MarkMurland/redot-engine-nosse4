@@ -14,16 +14,18 @@ jobs:
           submodules: recursive
 
       - name: Ensure no SSE4 flags are forced
+        shell: bash
         run: |
           set -e
-          if grep -RIn -- "-msse4" SConstruct platform/linuxbsd; then
+          if grep -RIn -- "-msse4" SConstruct platform/linuxbsd modules; then
             echo "SSE4 flag still present"; exit 1
           fi
-          if grep -RIn -- "-mssse3" SConstruct platform/linuxbsd; then
+          if grep -RIn -- "-mssse3" SConstruct platform/linuxbsd modules; then
             echo "SSSE3 flag still present"; exit 1
           fi
 
       - name: Install Linux dependencies
+        shell: bash
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential pkg-config gcc g++ \
@@ -34,6 +36,7 @@ jobs:
           python3 -m pip install --upgrade pip scons
 
       - name: Build editor (no SSE4.2)
+        shell: bash
         run: |
           scons platform=linuxbsd target=editor arch=x86_64 x11=yes wayland=no vulkan=no debug_symbols=no -j"$(nproc)"
 
@@ -43,11 +46,10 @@ jobs:
           set +e
           echo "PWD:"
           pwd
-          echo "Top-level files:"
-          find . -maxdepth 3 -type f | sort | head -200
           echo "bin contents:"
-          find bin -maxdepth 5 -type f 2>/dev/null | sort
-          echo "inspection complete"
+          find bin -maxdepth 4 -type f 2>/dev/null | sort
+          echo "repo root:"
+          find . -maxdepth 2 -type f | sort | head -200
 
       - name: Upload artifact
         if: always()
