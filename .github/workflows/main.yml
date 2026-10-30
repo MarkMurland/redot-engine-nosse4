@@ -1,7 +1,7 @@
 name: Redot editor (no SSE4.2)
 on:
   push:
-    branches: [nosse42]
+    branches: ["26.3-No-SSE4.2"]
   workflow_dispatch:
 
 jobs:
