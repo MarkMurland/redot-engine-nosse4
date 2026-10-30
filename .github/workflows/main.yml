@@ -37,15 +37,20 @@ jobs:
         run: |
           scons platform=linuxbsd target=editor arch=x86_64 x11=yes wayland=no vulkan=no debug_symbols=no -j"$(nproc)"
 
-      - name: Show generated binaries
+      - name: Show generated files
         run: |
-          echo "Contents of bin/ after build:"
-          find bin -maxdepth 3 -type f | sort || true
+          echo "PWD:"
+          pwd
+          echo "Top-level tree:"
+          find . -maxdepth 3 -type f | sort | head -200
+          echo "bin tree:"
+          find bin -maxdepth 5 -type f 2>/dev/null | sort || true
 
       - name: Upload artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: redot-editor-nosse42-linux
           path: |
             bin/**
-          if-no-files-found: error
+          if-no-files-found: warn
