@@ -1,3 +1,8 @@
+# Ensure the SCons environment exists before we inspect target CPU features.
+# This branch intentionally keeps the x86_64 baseline at SSE2 and avoids forcing
+# newer ISA levels such as SSE4.2, SSSE3, or POPCNT.
+env = Environment()
+
 # Set x86 CPU instruction sets to use by the compiler's autovectorization.
 if env["arch"] == "x86_64":
     # x86_64 CPUs are required to support SSE2, which is the baseline for 64-bit x86.
